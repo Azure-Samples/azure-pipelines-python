@@ -20,7 +20,7 @@ trigger:
       - "*"       # We're only uploading to build artifacts, so it's safe to trigger on all branches
   paths:
     include:
-    - .azure-pipelines/simple_package.0-basic-build.yml
+    - .azure-pipelines/simple_package.1-multi-target.yml
     - $(srcDirectory)/*
     - $(testsDirectory/*
 
