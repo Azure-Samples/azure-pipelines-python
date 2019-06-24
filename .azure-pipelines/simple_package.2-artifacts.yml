@@ -1,38 +1,38 @@
 # ##########
 #
-# A build run against multiple Python targets
+# A build resulting in a package upload to Azure Artifacts (private PyPI)
 #
-# We still have only 1 stage, but this time we're running parallel jobs for each target Python version
-# There are also some notable changes to the `Publish artifacts` task to capture artifacts per configuration
+# We run parallel Jobs to validate our package against multiple Python versions
+# Then we add a new Job to publish to an Artifacts feed after all validation has passed
 #
 # ##########
 
-# These variables still make sense to keep in one place, and are consistent across all jobs in the matrix
+# Pipeline-level variables
 variables:
   package: simple_package
   srcDirectory: src/$(package)
   testsDirectory: tests/$(package)
+  artifactFeed: az-samples
+  publishedVersion: 3.7
 
 # Trigger only when simple_package or its build has been modified
 trigger:
   branches:
     include:
-      - "*"       # We're only uploading to build artifacts, so it's safe to trigger on all branches
+      - "*"       # Trigger on all branches, but we'll filter to only publish to Artifacts on pushes to master
   paths:
     include:
-    - .azure-pipelines/simple_package.1-multi-target.yml
+    - .azure-pipelines/simple_package.2-artifacts.yml
     - $(srcDirectory)/*
     - $(testsDirectory/*
 
 # Jobs are collections of related steps
 jobs:
 
-# We define on Job to lint and test our package against multiple Python versions in parallel
+# Our initial Job will lint and test our package against multiple Python versions in parallel
 - job: Build
 
-  # We use a strategy pattern to run everything twice - once for 3.6, and once for 3.7
-  # Each configuration has its own variables used to customize the build - note that `pythonVersion` has moved and now varies per job
-  # These jobs run in parallel (https://docs.microsoft.com/en-us/azure/devops/pipelines/process/phases?tabs=yaml&view=azure-devops#multi-configuration)
+  # Strategy pattern to run all steps for multiple versions of Python
   strategy:
     matrix:
       python36:
@@ -45,7 +45,7 @@ jobs:
   pool:
     vmImage: ubuntu-16.04
 
-  # Steps are the specific tasks that execute code and do things
+# Steps are the specific tasks that execute code and do things
   steps:
 
   # Use a specific Python version
@@ -84,3 +84,34 @@ jobs:
     inputs:
       artifactName: dist$(pythonVersion)
       targetPath: $(srcDirectory)/dist
+
+# If all Build steps for all Python versions have succeeded,
+# we will download one of the already-validated build assets and publish it to an Azure Artifacts feed
+- job: Publish
+
+  # Steps are the specific tasks that execute code and do things
+  steps:
+
+  # Explicitly disable source checkout to keep a pristine environment for publishing
+  - checkout: none
+
+  # Download from build artifacts based on the chosen version
+  - task: DownloadPipelineArtifact@1
+    inputs:
+      artifactName: dist$(publishedVersion)
+      targetPath: dist
+
+  # Install tools needed for publishing
+  - bash: python -m pip install twine
+    displayName: Install twine
+
+  # Authenticate to Azure Artifacts
+  # This sets the PYPIRC_PATH environment variable, which contains credentials for the feed
+  - task: TwineAuthenticate@0
+    displayName: Configure twine authentication
+    inputs:
+      artifactFeeds: $(artifactFeed)
+
+  # Upload everything in the dist folder to the private Artifacts feed 
+  - script: twine upload -r $(artifactFeed) --config-file $(PYPIRC_PATH) dist/*
+    displayName: Publish artifacts

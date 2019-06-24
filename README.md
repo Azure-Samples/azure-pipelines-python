@@ -14,7 +14,7 @@ This sample contains several Azure Pipelines for Python developers that showcase
 
 [![Build Status](https://dev.azure.com/az-samples/azure-pipelines-python/_apis/build/status/simple_package.0-basic-build?branchName=master)](https://dev.azure.com/az-samples/azure-pipelines-python/_build/latest?definitionId=1&branchName=master)
 
-Build a simple package against a single Python target version
+Build a simple package against a single Python version
 
 Concepts:
 
@@ -26,16 +26,27 @@ Concepts:
 - Building a source archive and built distribution
 - Capturing build artifacts
 
-#### [1-multi-target](.azure-pipelines/simple_package.1-multi-target)
+#### [1-multi-target](.azure-pipelines/simple_package.1-multi-target.yml)
 
 [![Build Status](https://dev.azure.com/az-samples/azure-pipelines-python/_apis/build/status/simple_package.1-multi-target?branchName=master)](https://dev.azure.com/az-samples/azure-pipelines-python/_build/latest?definitionId=2&branchName=master)
 
-Build a simple package against a multiple Python target versions
+Build a simple package against multiple Python versions
 
 Concepts:
 
 - Building for multiple Python versions
 - Capturing multiple artifacts per build
+
+#### [2-artifacts](.azure-pipelines/simple_package.2-artifacts.yml)
+
+Build a simple package against multiple Python versions, then upload it to Azure Artifacts (private PyPI)
+
+Concepts:
+
+- Disabling code checkout to control the pipeline environment
+- Downloading previously uploaded build artifacts
+- Authenticating to Azure Artifacts
+- Publishing to a private Artifacts feed
 
 
 ## Development
