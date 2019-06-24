@@ -117,5 +117,5 @@ jobs:
       artifactFeeds: $(artifactFeed)
 
   # Upload everything in the dist folder to the private Artifacts feed 
-  - script: twine upload -r $(artifactFeed) --config-file $(PYPIRC_PATH) dist/*
+  - bash: twine upload -r $(artifactFeed) --config-file $(PYPIRC_PATH) dist/*
     displayName: Publish artifacts
