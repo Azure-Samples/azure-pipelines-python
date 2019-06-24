@@ -12,7 +12,7 @@ variables:
   pythonVersion: 3.7
   package: simple_package
   srcDirectory: src/$(package)
-  testDirectory: tests/$(package)
+  testsDirectory: tests/$(package)
 
 # Trigger only when simple_package or its build has been modified
 trigger:
@@ -23,7 +23,7 @@ trigger:
     include:
     - .azure-pipelines/simple_package.0-basic-build.yml
     - $(srcDirectory)/*
-    - $(testDirectory/*
+    - $(testsDirectory/*
 
 # Run on a Microsoft-hosted agent running Ubuntu-16.04
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops
@@ -44,9 +44,8 @@ steps:
   displayName: Install packages for build
 
 # Lint via pylint. We need to find all .py files under src/simple_package and run pylint to avoid errors
-- bash: find . -type f -name "*.py" | xargs pylint
+- bash: find $(srcDirectory) $(testsDirectory) -type f -name "*.py" | xargs pylint
   displayName: "Linting: pylint"
-  workingDirectory: $(srcDirectory)
 
 # Lint via flake8. flake8 has better discovery, so we can invoke it directly
 - bash: flake8
@@ -56,7 +55,7 @@ steps:
 # Run tests
 - bash: pytest
   displayName: Run tests
-  workingDirectory: $(workingDirectory)
+  workingDirectory: $(testsDirectory)
 
 # Our built source dist & wheel will land in src/simple_package/dist
 - bash: python setup.py sdist bdist_wheel
