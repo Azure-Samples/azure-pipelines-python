@@ -40,7 +40,7 @@ jobs:
   # We've got an additional variable that we want to construct per-job to keep artifact paths unique, but the logic is always the same
   # Jobs support variables, so we're able to do this here
   variables:
-    distDirectory: $(srcDirectory)/dist/$(pythonVersion)
+    distDirectory: $(Build.SourcesDirectory)/$(srcDirectory)/dist/$(pythonVersion)
 
   # Run on a Microsoft-hosted agent running Ubuntu-16.04
   # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops
