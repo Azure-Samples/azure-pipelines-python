@@ -45,6 +45,8 @@ Build a simple package against multiple Python versions, then upload it to Azure
 
 Concepts:
 
+- Setting dependency order
+- Conditionally running pipeline jobs
 - Disabling code checkout to control the pipeline environment
 - Downloading previously uploaded build artifacts
 - Authenticating to Azure Artifacts
