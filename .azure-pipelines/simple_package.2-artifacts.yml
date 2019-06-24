@@ -96,6 +96,10 @@ jobs:
   # Only publish when the previous Jobs are successful and we're building the master branch
   condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
 
+  # Variables specific to the Publish job
+  variables:
+    pythonVersion: 3.7
+
   # Steps are the specific tasks that execute code and do things
   steps:
 
@@ -107,6 +111,12 @@ jobs:
     inputs:
       artifactName: dist$(publishedVersion)
       targetPath: dist
+
+  # Set the version of Python to use for publishing (which may or may not match the version the package was built with or tested against)
+  - task: UsePythonVersion@0
+    displayName: Use Python $(pythonVersion)
+    inputs:
+      versionSpec: $(pythonVersion)
 
   # Install tools needed for publishing
   - bash: python -m pip install twine
