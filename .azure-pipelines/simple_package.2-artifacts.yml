@@ -30,6 +30,7 @@ trigger:
 jobs:
 
 # Our initial Job will lint and test our package against multiple Python versions in parallel
+# The name here is significant - we reference it later in the dependsOn property of the Publish job
 - job: Build
 
   # Strategy pattern to run all steps for multiple versions of Python
@@ -88,6 +89,9 @@ jobs:
 # If all Build steps for all Python versions have succeeded,
 # we will download one of the already-validated build assets and publish it to an Azure Artifacts feed
 - job: Publish
+
+  # We want to wait for all Build Jobs to complete before running the Publish Job
+  dependsOn: Build
 
   # Steps are the specific tasks that execute code and do things
   steps:
