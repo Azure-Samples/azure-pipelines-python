@@ -1,0 +1,88 @@
+# ##########
+#
+# A build run against multiple Python targets
+#
+# We still have only 1 stage, but this time we're running parallel jobs for each target Python version
+# There are also some notable changes to the `Build package` task to ensure unique artifact names
+#
+# ##########
+
+# These variables still make sense to keep in one place, and are consistent across all jobs in the matrix
+variables:
+  package: simple_package
+  srcDirectory: src/$(package)
+  testsDirectory: tests/$(package)
+
+# Trigger only when simple_package or its build has been modified
+trigger:
+  branches:
+    include:
+      - "*"       # We're only uploading to build artifacts, so it's safe to trigger on all branches
+  paths:
+    include:
+    - .azure-pipelines/simple_package.0-basic-build.yml
+    - $(srcDirectory)/*
+    - $(testsDirectory/*
+
+jobs:
+- job: Build
+
+  # We use a strategy pattern to run everything twice - once for 3.6, and once for 3.7
+  # Each configuration has its own variables used to customize the build - note that `pythonVersion` has moved and now varies per job
+  # These jobs run in parallel (https://docs.microsoft.com/en-us/azure/devops/pipelines/process/phases?tabs=yaml&view=azure-devops#multi-configuration)
+  strategy:
+    matrix:
+      python36:
+        pythonVersion: 3.6
+      python37:
+        pythonVersion: 3.7
+
+  # We've got an additional variable that we want to construct per-job to keep artifact paths unique, but the logic is always the same
+  # Jobs support variables, so we're able to do this here
+  variables:
+    distDirectory: $(srcDirectory)/dist/$(pythonVersion)
+
+  # Run on a Microsoft-hosted agent running Ubuntu-16.04
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops
+  pool:
+    vmImage: ubuntu-16.04
+
+  # Steps are the specific tasks that execute code and do things
+  steps:
+
+  # Use a specific Python version
+  - task: UsePythonVersion@0
+    displayName: Use Python $(pythonVersion)
+    inputs:
+      versionSpec: $(pythonVersion)
+
+  # Install some tools needed for build (pylint, flake8, etc)
+  - bash: pip install -r requirements.build.txt -U --upgrade-strategy eager
+    displayName: Install packages for build
+
+  # Lint via pylint. We need to find all .py files under src/simple_package and run pylint to avoid errors
+  - bash: find $(srcDirectory) $(testsDirectory) -type f -name "*.py" | xargs pylint
+    displayName: "Linting: pylint"
+
+  # Lint via flake8. flake8 has better discovery, so we can invoke it directly
+  - bash: flake8
+    displayName: "Linting: flake8"
+    workingDirectory: $(srcDirectory)
+
+  # Run tests
+  - bash: pytest
+    displayName: Run tests
+    workingDirectory: $(testsDirectory)
+
+  # Each job will run this task, so we need to ensure a unique name when uploading, otherwise we'll get only one artifact from the last job to upload
+  # Our built source dist & wheel will land in src/simple_package/dist/{3.6|3.7}
+  - bash: python setup.py sdist -d $(distDirectory) bdist_wheel -d $(distDirectory)
+    displayName: Build package
+    workingDirectory: $(srcDirectory)
+
+  # Upload everything in src/simple_package/dist (including subfolders) to the build artifacts for later use or debugging
+  - task: PublishPipelineArtifact@0
+    displayName: Publish artifacts
+    inputs:
+      artifactName: dist
+      targetPath: $(srcDirectory)/dist
