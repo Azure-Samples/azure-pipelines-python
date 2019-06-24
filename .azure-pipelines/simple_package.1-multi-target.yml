@@ -85,4 +85,4 @@ jobs:
     displayName: Publish artifacts
     inputs:
       artifactName: dist
-      targetPath: $(srcDirectory)/dist
+      targetPath: $(distDirectory)
