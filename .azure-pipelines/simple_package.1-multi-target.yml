@@ -3,7 +3,7 @@
 # A build run against multiple Python targets
 #
 # We still have only 1 stage, but this time we're running parallel jobs for each target Python version
-# There are also some notable changes to the `Build package` task to ensure unique artifact names
+# There are also some notable changes to the `Publish artifacts` task to capture artifacts per configuration
 #
 # ##########
 
@@ -12,10 +12,6 @@ variables:
   package: simple_package
   srcDirectory: src/$(package)
   testsDirectory: tests/$(package)
-  
-  # We'll use one of the predefined variables to get an absolute path to the dist directory
-  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#build-variables
-  distDirectory: $(Build.SourcesDirectory)/$(srcDirectory)/dist
 
 # Trigger only when simple_package or its build has been modified
 trigger:
@@ -40,11 +36,6 @@ jobs:
         pythonVersion: 3.6
       python37:
         pythonVersion: 3.7
-
-  # We've got an additional variable that we want to construct per-job to keep artifact paths unique, but the logic is always the same
-  # Jobs support variables, so we're able to do this here
-  variables:
-    versionedDistDirectory: $(distDirectory)/$(pythonVersion)
 
   # Run on a Microsoft-hosted agent running Ubuntu-16.04
   # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops
@@ -78,15 +69,15 @@ jobs:
     displayName: Run tests
     workingDirectory: $(testsDirectory)
 
-  # Each job will run this task, so we need to ensure a unique name when uploading, otherwise we'll get an error because the artifact already exists
-  # Our built source dist & wheel will land in src/simple_package/dist/{3.6|3.7}
-  - bash: python setup.py sdist -d $(versionedDistDirectory) bdist_wheel -d $(versionedDistDirectory)
+  # Our built source dist & wheel will land in src/simple_package/dist
+  - bash: python setup.py sdist bdist_wheel
     displayName: Build package
     workingDirectory: $(srcDirectory)
 
   # Upload everything in src/simple_package/dist (including subfolders) to the build artifacts for later use or debugging
+  # Add pythonVersion to the artifact name to avoid conflicts and ensure we capture all build output
   - task: PublishPipelineArtifact@0
     displayName: Publish artifacts
     inputs:
-      artifactName: dist
-      targetPath: $(distDirectory)
+      artifactName: dist$(pythonVersion)
+      targetPath: $(srcDirectory)/dist
