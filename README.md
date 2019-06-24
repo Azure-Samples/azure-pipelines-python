@@ -16,6 +16,18 @@ This repo contains tested reference examples of using Python with Azure Pipeline
     - running tests
     - build a Docker image
 
+- Python development with VS Code
+    - [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+    - [Azure Pipelines](https://marketplace.visualstudio.com/items?itemName=ms-azure-devops.azure-pipelines)
+
+## Development
+
+```shell
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.dev.txt -U --upgrade-strategy eager
+```
+
 ## Resources
 
 - [Build Python apps](https://docs.microsoft.com/en-us/azure/devops/pipelines/languages/python?view=azure-devops)

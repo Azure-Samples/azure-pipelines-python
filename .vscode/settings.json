@@ -1,0 +1,20 @@
+{
+    "files.associations": {
+        "**/.azure-pipelines/*.yml": "azure-pipelines"
+    },
+    
+    "python.pythonPath": ".venv/bin/python",
+    "python.formatting.provider": "black",
+    
+    "python.testing.pyTestEnabled": true,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.unittestEnabled": false,
+    
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.flake8Enabled": true,
+    
+    "[python]": {
+        "editor.formatOnSave": true,
+    },
+}
