@@ -39,6 +39,8 @@ Concepts:
 
 #### [2-artifacts](.azure-pipelines/simple_package.2-artifacts.yml)
 
+[![Build Status](https://dev.azure.com/az-samples/azure-pipelines-python/_apis/build/status/simple_package.2-artifacts?branchName=master)](https://dev.azure.com/az-samples/azure-pipelines-python/_build/latest?definitionId=3&branchName=master)
+
 Build a simple package against multiple Python versions, then upload it to Azure Artifacts (private PyPI)
 
 Concepts:
