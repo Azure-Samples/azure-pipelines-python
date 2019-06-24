@@ -12,7 +12,7 @@ variables:
   package: simple_package
   srcDirectory: src/$(package)
   testsDirectory: tests/$(package)
-  artifactFeed: az-samples
+  artifactFeed: artifacts
   publishedVersion: 3.7
 
 # Trigger only when simple_package or its build has been modified
