@@ -90,6 +90,11 @@ jobs:
 # we will download one of the already-validated build assets and publish it to an Azure Artifacts feed
 - job: Publish
 
+  # Run on a Microsoft-hosted agent running Ubuntu-16.04
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops
+  pool:
+    vmImage: ubuntu-16.04
+
   # We want to wait for all Build Jobs to complete before running the Publish Job
   dependsOn: Build
 
@@ -98,6 +103,7 @@ jobs:
 
   # Variables specific to the Publish job
   variables:
+    artifactName: dist$(publishedVersion)
     pythonVersion: 3.7
 
   # Steps are the specific tasks that execute code and do things
@@ -106,11 +112,9 @@ jobs:
   # Explicitly disable source checkout to keep a pristine environment for publishing
   - checkout: none
 
-  # Download from build artifacts based on the chosen version
-  - task: DownloadPipelineArtifact@1
-    inputs:
-      artifactName: dist$(publishedVersion)
-      targetPath: dist
+  # Download from build artifacts
+  - download: current
+    artifact: $(artifactName)
 
   # Set the version of Python to use for publishing (which may or may not match the version the package was built with or tested against)
   - task: UsePythonVersion@0
@@ -130,5 +134,5 @@ jobs:
       artifactFeeds: $(artifactFeed)
 
   # Upload everything in the dist folder to the private Artifacts feed 
-  - bash: twine upload -r $(artifactFeed) --config-file $(PYPIRC_PATH) dist/*
+  - bash: twine upload -r $(artifactFeed) --config-file $(PYPIRC_PATH) $(Pipeline.Workspace)/$(artifactName)/*
     displayName: Publish artifacts
