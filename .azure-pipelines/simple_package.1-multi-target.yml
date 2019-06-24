@@ -21,8 +21,8 @@ trigger:
   paths:
     include:
     - .azure-pipelines/simple_package.1-multi-target.yml
-    - $(srcDirectory)/*
-    - $(testsDirectory/*
+    - src/simple_package/*
+    - tests/simple_package/*
 
 # Jobs are collections of related steps
 jobs:

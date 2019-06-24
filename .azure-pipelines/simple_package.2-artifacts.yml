@@ -23,8 +23,8 @@ trigger:
   paths:
     include:
     - .azure-pipelines/simple_package.2-artifacts.yml
-    - $(srcDirectory)/*
-    - $(testsDirectory/*
+    - src/simple_package/*
+    - tests/simple_package/*
 
 # Jobs are collections of related steps
 jobs:
