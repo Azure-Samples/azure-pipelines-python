@@ -52,6 +52,18 @@ Concepts:
 - Authenticating to Azure Artifacts
 - Publishing to a private Artifacts feed
 
+### simple_server
+
+`simple_server` is a minimal Flask application that takes a dependency on `simple_package` from the Azure Artifacts feed. It can be run as a standalone Python application, or can be built as a Docker container image.
+
+#### [1-consume-artifacts]
+
+Build a Python application that has a dependency on a package sourced from Azure Artifacts
+
+Concepts:
+
+- Authenticating to Azure Artifacts for pip
+- Installing private dependencies
 
 ## Development
 
