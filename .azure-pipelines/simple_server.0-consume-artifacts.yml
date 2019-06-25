@@ -79,7 +79,8 @@ jobs:
     workingDirectory: $(srcDirectory)
 
   # Run tests
-  - bash: pytest
+  # Add the Python version to distinguish between tests on the results page
+  - bash: pytest --test-run-title="Python $(pythonVersion)"
     displayName: Run tests
     workingDirectory: $(testsDirectory)
 

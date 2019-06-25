@@ -64,6 +64,7 @@ Concepts:
 
 - Authenticating to Azure Artifacts for pip
 - Installing private dependencies
+- Distinguish between Python versions in pytest output
 
 ## Development
 
