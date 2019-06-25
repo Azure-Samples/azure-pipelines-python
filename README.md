@@ -84,6 +84,10 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.dev.txt -U --upgrade-strategy eager
 
+# Install packages in editable mode
+python -m pip install -e src/simple_package
+python -m pip install -e src/simple_server
+
 # Start coding! :)
 code .
 ```
