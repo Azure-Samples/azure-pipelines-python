@@ -27,7 +27,7 @@ trigger:
 # Jobs are collections of related steps
 jobs:
 
-# We define on Job to lint and test our package against multiple Python versions in parallel
+# We define one Job to lint and test our package against multiple Python versions in parallel
 - job: Build
 
   # We use a strategy pattern to run everything twice - once for 3.6, and once for 3.7
