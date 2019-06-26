@@ -12,7 +12,7 @@ variables:
   srcDirectory: src/$(app)
   testsDirectory: tests/$(app)
   artifactFeed: artifacts
-  packagedVersion: 3.7
+  publishedVersion: 3.7
   registryName: azsamples.azurecr.io
   imageName: simple_server
 
