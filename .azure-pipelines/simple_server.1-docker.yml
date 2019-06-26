@@ -139,12 +139,12 @@ jobs:
   - bash: |
       docker build \
         --build-arg 'PIP_EXTRA_INDEX_URL=$(PIP_EXTRA_INDEX_URL)' \
-        -t $(containerRegistry)/$(imageName):$(Build.BuildNumber) \
+        -t $(registryName)/$(imageName):$(Build.BuildNumber) \
         .
     displayName: Build container image
     workingDirectory: $(srcDirectory)
 
   # Only tag `latest` when the previous Steps are successful and we're building the master branch
-  - bash: docker tag $(containerRegistry)/$(imageName):$(Build.BuildNumber) $(containerRegistry)/$(imageName):latest
+  - bash: docker tag $(registryName)/$(imageName):$(Build.BuildNumber) $(registryName)/$(imageName):latest
     displayName: Tag `latest` image
     condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
