@@ -6,6 +6,8 @@ This repo contains tested reference examples of using Python with Azure Pipeline
 
 This sample contains several Azure Pipelines for Python developers that showcase useful end-to-end patterns of varying complexity. All pipelines are in the [`.azure-pipelines`](.azure-pipelines) folder and have been fully annotated and validated.
 
+Pipeline results and sample Artifacts for the definitions contained in this repo can be viewed at the following Azure DevOps organization: [az-samples](https://dev.azure.com/az-samples/azure-pipelines-python/_build)
+
 ### simple_package
 
 `simple_package` is a pure Python package with no external dependencies. It exists to give just-enough structure to show how to use Azure Pipelines with Python.
