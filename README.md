@@ -58,6 +58,8 @@ Concepts:
 
 #### [0-consume-artifacts](.azure-pipelines/simple_server.0-consume-artifacts.yml)
 
+[![Build Status](https://dev.azure.com/az-samples/azure-pipelines-python/_apis/build/status/simple_server.0-consume-artifacts?branchName=master)](https://dev.azure.com/az-samples/azure-pipelines-python/_build/latest?definitionId=4&branchName=master)
+
 Build a Python application that has a dependency on a package sourced from Azure Artifacts
 
 Concepts:
@@ -67,6 +69,8 @@ Concepts:
 - Distinguish between Python versions in pytest output
 
 #### [1-docker](.azure-pipelines/simple_server.1-docker.yml)
+
+[![Build Status](https://dev.azure.com/az-samples/azure-pipelines-python/_apis/build/status/simple_server.1-docker?branchName=master)](https://dev.azure.com/az-samples/azure-pipelines-python/_build/latest?definitionId=5&branchName=master)
 
 Build a Docker image using an application that pulls dependencies from Azure Artifats
 
