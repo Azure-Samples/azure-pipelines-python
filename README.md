@@ -85,6 +85,7 @@ Concepts:
 This project has been configured for Python development with [VS Code](https://code.visualstudio.com/) using the following extensions:
 - [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 - [Azure Pipelines](https://marketplace.visualstudio.com/items?itemName=ms-azure-devops.azure-pipelines)
+- [Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker)
 
 To get started, clone the repo, and run the following commands to get started with a new environment
 
