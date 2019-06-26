@@ -1,0 +1,150 @@
+# ##########
+#
+# Build and test an application that takes a dependency on a package pulled from Azure Artifacts (private PyPI)
+#
+# We run parallel Jobs to validate our app against multiple Python versions
+#
+# ##########
+
+# Pipeline-level variables
+variables:
+  app: simple_server
+  srcDirectory: src/$(app)
+  testsDirectory: tests/$(app)
+  artifactFeed: artifacts
+  packagedVersion: 3.7
+  registryName: azsamples.azurecr.io
+  imageName: simple_server
+
+# Trigger only when simple_server or its build has been modified
+trigger:
+  branches:
+    include:
+      - "*"
+  paths:
+    include:
+    - .azure-pipelines/simple_server.1-docker.yml
+    - src/simple_server/*
+    - tests/simple_server/*
+
+# Jobs are collections of related steps
+jobs:
+
+# Our initial Job will lint and test our package against multiple Python versions in parallel
+# The name here is significant - we reference it later in the dependsOn property of the Package job
+- job: Build
+
+  # We use a strategy pattern to run everything twice - once for 3.6, and once for 3.7
+  # Each configuration has its own variables used to customize the build - note that `pythonVersion` has moved and now varies per job
+  # These jobs run in parallel (https://docs.microsoft.com/en-us/azure/devops/pipelines/process/phases?tabs=yaml&view=azure-devops#multi-configuration)
+  strategy:
+    matrix:
+      python36:
+        pythonVersion: 3.6
+      python37:
+        pythonVersion: 3.7
+
+  # Run on a Microsoft-hosted agent running Ubuntu-16.04
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops
+  pool:
+    vmImage: ubuntu-16.04
+
+  # Steps are the specific tasks that execute code and do things
+  steps:
+
+  # Use a specific Python version
+  - task: UsePythonVersion@0
+    displayName: Use Python $(pythonVersion)
+    inputs:
+      versionSpec: $(pythonVersion)
+
+  # Install some tools needed for build (pylint, flake8, etc)
+  - bash: pip install -r requirements.build.txt -U --upgrade-strategy eager
+    displayName: Install packages for build
+  
+  # Authenticate to Azure Artifacts
+  - task: PipAuthenticate@0
+    displayName: Authenticate with artifact feed
+    inputs:
+      artifactFeeds: $(artifactFeed)
+
+  # Install the app in editable mode to install dependencies
+  - bash: pip install -e .
+    displayName: Install packages for app
+    workingDirectory: $(srcDirectory)
+
+  # Lint via pylint. We need to find all .py files under src/simple_package and run pylint to avoid errors
+  - bash: find $(srcDirectory) $(testsDirectory) -type f -name "*.py" | xargs pylint
+    displayName: "Linting: pylint"
+
+  # Lint via flake8. flake8 has better discovery, so we can invoke it directly
+  - bash: flake8
+    displayName: "Linting: flake8"
+    workingDirectory: $(srcDirectory)
+
+  # Run tests
+  # Add the Python version to distinguish between tests on the results page
+  - bash: pytest --test-run-title="Python $(pythonVersion)"
+    displayName: Run tests
+    workingDirectory: $(testsDirectory)
+
+  # Our built source dist & wheel will land in src/simple_package/dist
+  - bash: python setup.py sdist bdist_wheel
+    displayName: Build package
+    workingDirectory: $(srcDirectory)
+
+  # Upload everything in src/simple_package/dist (including subfolders) to the build artifacts for later use or debugging
+  # Add pythonVersion to the artifact name to avoid conflicts and ensure we capture all build output
+  - task: PublishPipelineArtifact@0
+    displayName: Publish artifacts
+    inputs:
+      artifactName: dist$(pythonVersion)
+      targetPath: $(srcDirectory)/dist
+
+# If all Build steps for all Python versions have succeeded,
+# we will download one of the already-validated build assets and package it into a container image
+- job: Docker
+
+  # Run on a Microsoft-hosted agent running Ubuntu-16.04
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops
+  pool:
+    vmImage: ubuntu-16.04
+
+  # We want to wait for all Build Jobs to complete before running the Docker Job
+  dependsOn: Build
+
+  # Variables specific to the Publish job
+  variables:
+    artifactName: dist$(publishedVersion)
+    pythonVersion: 3.7
+
+  # Steps are the specific tasks that execute code and do things
+  steps:
+
+  # Download from build artifacts using the long-form task to control the download path
+  # We want the pre-validated package to land at src/simple_server/dist to be available for Docker
+  - task: DownloadBuildArtifacts@0
+    inputs:
+      artifactName: $(artifactName)
+      downloadPath: $(srcDirectory)/dist
+
+  # Authenticate to Azure Artifacts
+  # This makes the PIP_EXTRA_INDEX_URL Azure DevOps variable / environment var available in future steps
+  - task: PipAuthenticate@0
+    displayName: Authenticate with artifact feed
+    inputs:
+      artifactFeeds: $(artifactFeed)
+
+  # Build a container image, passing in the PIP_EXTRA_INDEX_URL from the PipAuthenticate task
+  - bash: |
+      docker build \
+        --build-arg 'PIP_EXTRA_INDEX_URL=$(PIP_EXTRA_INDEX_URL)' \
+        -t $(containerRegistry)/$(imageName):$(Build.BuildNumber) \
+        .
+    displayName: Build container image
+    workingDirectory: $(srcDirectory)
+
+  # Only tag `latest` when the previous Steps are successful and we're building the master branch
+  - bash: docker tag $(containerRegistry)/$(imageName):$(Build.BuildNumber) $(containerRegistry)/$(imageName):latest
+    displayName: Tag `latest` image
+    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))

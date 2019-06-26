@@ -56,7 +56,7 @@ Concepts:
 
 `simple_server` is a minimal Flask application that takes a dependency on `simple_package` from the Azure Artifacts feed. It can be run as a standalone Python application, or can be built as a Docker container image.
 
-#### [1-consume-artifacts]
+#### [0-consume-artifacts](.azure-pipelines/simple_server.0-consume-artifacts.yml)
 
 Build a Python application that has a dependency on a package sourced from Azure Artifacts
 
@@ -65,6 +65,16 @@ Concepts:
 - Authenticating to Azure Artifacts for pip
 - Installing private dependencies
 - Distinguish between Python versions in pytest output
+
+#### [1-docker](.azure-pipelines/simple_server.1-docker.yml)
+
+Build a Docker image using an application that pulls dependencies from Azure Artifats
+
+Concepts:
+
+- Customizing the build artifact download path
+- Building a containerized Python app with Azure Artifacts
+- Using multi-stage builds with pip
 
 ## Development
 
