@@ -72,7 +72,7 @@ Concepts:
 
 [![Build Status](https://dev.azure.com/az-samples/azure-pipelines-python/_apis/build/status/simple_server.1-docker?branchName=master)](https://dev.azure.com/az-samples/azure-pipelines-python/_build/latest?definitionId=5&branchName=master)
 
-Build a Docker image using an application that pulls dependencies from Azure Artifats
+Build a Docker image using an application that pulls dependencies from Azure Artifacts
 
 Concepts:
 
