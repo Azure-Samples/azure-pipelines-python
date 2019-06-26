@@ -123,11 +123,11 @@ jobs:
 
   # Download from build artifacts using the long-form task to control the download path
   # We want the pre-validated package to land at $(Build.SourcesDirectory)/src/simple_server/dist to be available for Docker
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@2
     displayName: Download application
     inputs:
-      artifactName: $(artifactName)
-      downloadPath: $(Build.SourcesDirectory)/$(srcDirectory)/dist
+      artifact: $(artifactName)
+      path: $(Build.SourcesDirectory)/$(srcDirectory)/dist
 
   # Authenticate to Azure Artifacts
   # This makes the PIP_EXTRA_INDEX_URL Azure DevOps variable / environment var available in future steps
