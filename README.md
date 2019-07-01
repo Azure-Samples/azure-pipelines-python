@@ -1,3 +1,12 @@
+---
+topic: sample
+languages:
+  - python
+  - yaml
+products:
+  - azure-devops
+---
+
 # azure-pipelines-python
 
 This repo contains tested reference examples of using Python with Azure Pipelines.
